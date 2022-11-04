@@ -7,18 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		25B5AEFF29144A7100AD4C05 /* Clever_MindApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AEFE29144A7100AD4C05 /* Clever_MindApp.swift */; };
-		25B5AF0129144A7100AD4C05 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AF0029144A7100AD4C05 /* ContentView.swift */; };
 		25B5AF0329144A7D00AD4C05 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 25B5AF0229144A7D00AD4C05 /* Assets.xcassets */; };
 		25B5AF0629144A7D00AD4C05 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 25B5AF0529144A7D00AD4C05 /* Preview Assets.xcassets */; };
+		25B5AF1829144B2200AD4C05 /* MindNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AF0D29144B2200AD4C05 /* MindNode.swift */; };
+		25B5AF1929144B2200AD4C05 /* MapNodeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AF0E29144B2200AD4C05 /* MapNodeRenderer.swift */; };
+		25B5AF1A29144B2200AD4C05 /* DataConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AF0F29144B2200AD4C05 /* DataConstants.swift */; };
+		25B5AF1B29144B2200AD4C05 /* DataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AF1029144B2200AD4C05 /* DataController.swift */; };
+		25B5AF1C29144B2200AD4C05 /* NodeCoreDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AF1129144B2200AD4C05 /* NodeCoreDataRepository.swift */; };
+		25B5AF1D29144B2200AD4C05 /* AddNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AF1229144B2200AD4C05 /* AddNode.swift */; };
+		25B5AF1E29144B2200AD4C05 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AF1329144B2200AD4C05 /* ContentView.swift */; };
+		25B5AF1F29144B2200AD4C05 /* NodeDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AF1429144B2200AD4C05 /* NodeDetail.swift */; };
+		25B5AF2029144B2200AD4C05 /* CleverMindApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AF1529144B2200AD4C05 /* CleverMindApp.swift */; };
+		25B5AF2129144B2200AD4C05 /* MindMapModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 25B5AF1629144B2200AD4C05 /* MindMapModel.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		25B5AEFB29144A7100AD4C05 /* Clever-Mind.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Clever-Mind.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		25B5AEFE29144A7100AD4C05 /* Clever_MindApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clever_MindApp.swift; sourceTree = "<group>"; };
-		25B5AF0029144A7100AD4C05 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		25B5AF0229144A7D00AD4C05 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		25B5AF0529144A7D00AD4C05 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		25B5AF0C29144B2100AD4C05 /* Clever-Mind-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Clever-Mind-Bridging-Header.h"; sourceTree = "<group>"; };
+		25B5AF0D29144B2200AD4C05 /* MindNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MindNode.swift; sourceTree = "<group>"; };
+		25B5AF0E29144B2200AD4C05 /* MapNodeRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapNodeRenderer.swift; sourceTree = "<group>"; };
+		25B5AF0F29144B2200AD4C05 /* DataConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataConstants.swift; sourceTree = "<group>"; };
+		25B5AF1029144B2200AD4C05 /* DataController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataController.swift; sourceTree = "<group>"; };
+		25B5AF1129144B2200AD4C05 /* NodeCoreDataRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NodeCoreDataRepository.swift; sourceTree = "<group>"; };
+		25B5AF1229144B2200AD4C05 /* AddNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddNode.swift; sourceTree = "<group>"; };
+		25B5AF1329144B2200AD4C05 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		25B5AF1429144B2200AD4C05 /* NodeDetail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NodeDetail.swift; sourceTree = "<group>"; };
+		25B5AF1529144B2200AD4C05 /* CleverMindApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CleverMindApp.swift; sourceTree = "<group>"; };
+		25B5AF1729144B2200AD4C05 /* MindMapModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MindMapModel.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,10 +68,19 @@
 		25B5AEFD29144A7100AD4C05 /* Clever-Mind */ = {
 			isa = PBXGroup;
 			children = (
-				25B5AEFE29144A7100AD4C05 /* Clever_MindApp.swift */,
-				25B5AF0029144A7100AD4C05 /* ContentView.swift */,
+				25B5AF1229144B2200AD4C05 /* AddNode.swift */,
+				25B5AF1529144B2200AD4C05 /* CleverMindApp.swift */,
+				25B5AF1329144B2200AD4C05 /* ContentView.swift */,
+				25B5AF0F29144B2200AD4C05 /* DataConstants.swift */,
+				25B5AF1029144B2200AD4C05 /* DataController.swift */,
+				25B5AF0E29144B2200AD4C05 /* MapNodeRenderer.swift */,
+				25B5AF1629144B2200AD4C05 /* MindMapModel.xcdatamodeld */,
+				25B5AF0D29144B2200AD4C05 /* MindNode.swift */,
+				25B5AF1129144B2200AD4C05 /* NodeCoreDataRepository.swift */,
+				25B5AF1429144B2200AD4C05 /* NodeDetail.swift */,
 				25B5AF0229144A7D00AD4C05 /* Assets.xcassets */,
 				25B5AF0429144A7D00AD4C05 /* Preview Content */,
+				25B5AF0C29144B2100AD4C05 /* Clever-Mind-Bridging-Header.h */,
 			);
 			path = "Clever-Mind";
 			sourceTree = "<group>";
@@ -99,6 +125,7 @@
 				TargetAttributes = {
 					25B5AEFA29144A7100AD4C05 = {
 						CreatedOnToolsVersion = 14.0.1;
+						LastSwiftMigration = 1400;
 					};
 				};
 			};
@@ -137,8 +164,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				25B5AF0129144A7100AD4C05 /* ContentView.swift in Sources */,
-				25B5AEFF29144A7100AD4C05 /* Clever_MindApp.swift in Sources */,
+				25B5AF2129144B2200AD4C05 /* MindMapModel.xcdatamodeld in Sources */,
+				25B5AF1829144B2200AD4C05 /* MindNode.swift in Sources */,
+				25B5AF1B29144B2200AD4C05 /* DataController.swift in Sources */,
+				25B5AF1E29144B2200AD4C05 /* ContentView.swift in Sources */,
+				25B5AF2029144B2200AD4C05 /* CleverMindApp.swift in Sources */,
+				25B5AF1A29144B2200AD4C05 /* DataConstants.swift in Sources */,
+				25B5AF1F29144B2200AD4C05 /* NodeDetail.swift in Sources */,
+				25B5AF1D29144B2200AD4C05 /* AddNode.swift in Sources */,
+				25B5AF1C29144B2200AD4C05 /* NodeCoreDataRepository.swift in Sources */,
+				25B5AF1929144B2200AD4C05 /* MapNodeRenderer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,6 +299,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Clever-Mind/Preview Content\"";
@@ -283,6 +319,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "hcos.Clever-Mind";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Clever-Mind/Clever-Mind-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -293,6 +331,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Clever-Mind/Preview Content\"";
@@ -312,6 +351,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "hcos.Clever-Mind";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Clever-Mind/Clever-Mind-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -339,6 +379,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		25B5AF1629144B2200AD4C05 /* MindMapModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				25B5AF1729144B2200AD4C05 /* MindMapModel.xcdatamodel */,
+			);
+			currentVersion = 25B5AF1729144B2200AD4C05 /* MindMapModel.xcdatamodel */;
+			path = MindMapModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 25B5AEF329144A7100AD4C05 /* Project object */;
 }
