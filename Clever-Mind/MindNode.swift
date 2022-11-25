@@ -7,7 +7,7 @@
 
 import Foundation
 
-class MindNode : Identifiable, ObservableObject, Equatable, CustomStringConvertible{
+class MindNode : Identifiable, ObservableObject, Equatable, CustomStringConvertible, Hashable{
     
     static func == (lhs: MindNode, rhs: MindNode) -> Bool {
         return lhs.id == rhs.id
@@ -22,12 +22,19 @@ class MindNode : Identifiable, ObservableObject, Equatable, CustomStringConverti
     var title : String
     var data : String
     var selected = false
+    var isParent : Bool
     
-    init(_ title : String, _ data : String) {
+    var children = [String]()
+    
+    init(_ title : String, _ data : String, _ isParent: Bool) {
         self.title = title
         self.data = DataConstants.ERGO_TEXT.rawValue
+        self.isParent = isParent
     }
     
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 
     
 }

@@ -12,7 +12,7 @@ struct ContentView: View {
     
     let tokens = ["rock", "paper", "sissors"]
     
-    @State var activeVNodes : [MindNode] = [MindNode("test","test")] //Vertical nodes
+    @State var activeVNodes = [MindNode]() //Vertical nodes
     
     @Environment(\.managedObjectContext) var moc
     
@@ -93,7 +93,8 @@ struct ContentView: View {
                            
                         }
                         
-                    }.frame(width: horizontalScrollAreaSize, height: verticalScrollAreaSize, alignment: .center)
+                    }
+                    .frame(width: horizontalScrollAreaSize, height: verticalScrollAreaSize, alignment: .center)
                     
                 }
                 
@@ -142,7 +143,14 @@ struct ContentView: View {
             return node.id
         }
         print("Selected nodes \(seletecNodeStrings)")
-        vNodeContainer.append(MindNode("","test"))
+        
+        if(vNodeContainer.count == 0) {
+            vNodeContainer.append(MindNode("","test", true))
+        } else {
+            vNodeContainer.append(MindNode("","test", false))
+        }
+        
+        
         verticalScrollAreaSize += 100
         print("Vertical scroll area size \(verticalScrollAreaSize)")
         print(vNodeContainer)

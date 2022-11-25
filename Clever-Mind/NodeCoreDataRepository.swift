@@ -55,7 +55,7 @@ struct NodeCoreDataRepository {
         var nodesToMindNode : [MindNode] =  fetchedNodes.map { node in
             var nodeAsNode = node as! Node
             
-            var mindNode = MindNode(nodeAsNode.title ?? "" ,nodeAsNode.data ?? "")
+            var mindNode = MindNode(nodeAsNode.title ?? "" ,nodeAsNode.data ?? "" , nodeAsNode.isParentNode)
             
             return mindNode
         }
