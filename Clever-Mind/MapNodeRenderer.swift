@@ -41,6 +41,14 @@ struct MapNodeRenderer : View {
         ForEach(getNodes(someNodes), id: \.offset) { index, data in
             GeometryReader { geo in
                     ZStack {
+                        
+                        Circle()
+                            .size(width: 400, height: 300)
+                            .offset(x: -135, y: -120)
+                            .onTapGesture {
+                                print("Global centre:  \(geo.frame(in: .global).midX) x \(geo.frame(in: .global).midY)")
+                            }
+                        
                             NavigationLink(destination: {
                                 Text("Hello")
                 
@@ -72,6 +80,7 @@ struct MapNodeRenderer : View {
                             .multilineTextAlignment(.center)
                             .frame(width: 100, height: 50)
                         }.border(.black)
+                  
                     .position(x: nodePositionHolder.x(data, geo), y: nodePositionHolder.y(data, geo) )
                             .fixedSize()
             }
@@ -109,21 +118,80 @@ struct MapNodeRenderer : View {
 struct ContentView_Previews: PreviewProvider {
     
     static func getSomeRandomNodes() -> [MindNode] {
-        return [MindNode("test", "test", true)]
+        return [MindNode("node 1", "test", true)]
+    }
+    
+    init() {
     }
     
     static var previews: some View {
-        MapNodeRenderer(someNodes: Binding.constant(getSomeRandomNodes()), aString: Binding.constant("test"))
-            .previewLayout(PreviewLayout.sizeThatFits)
-            .padding()
-            .previewDisplayName("Default preview")
+        //        MapNodeRenderer(someNodes: Binding.constant(getSomeRandomNodes()), aString: Binding.constant("test"))
+        //            .previewLayout(PreviewLayout.sizeThatFits)
+        //            .padding()
+        //            .previewDisplayName("Default preview")
+        
+        
+        
+        ZStack{
+            Section {
+                
+                ForEach(placeNumbersInCircularPath(), id: \.self) { cord in
+                    HStack{
+                        Text("\(cord.xCor) \(cord.yCor)")
+                       Circle().size(width: 10, height: 10).position(x: CGFloat(cord.xCor), y: CGFloat(cord.yCor)).fixedSize()
+
+                       // Circle().size(width: 30, height: 30).position(x: 250  , y:0 )
+                    }
+
+
+                }
+                
+            
+                
+               // Circle().size(width: 30, height: 30).position(x: 0  , y: 0).fixedSize()
+               // Circle().size(width: 30, height: 30).position(x: 0  , y: 0 ).fixedSize()
+
+
+                
+            }
+            
+            
+        }}
+    
+    static func placeNumbersInCircularPath() -> [NodeCoordinate] {
+        let number = 3.0 // how many number to be placed
+        let size = 50.0 // size of circle i.e. w = h = 260
+        let cx =  size/2 // center of x(in a circle)
+        let cy  = size/2// center of y(in a circle)
+        let r = size/2 // radius of a circle
+        
+        var arrayOfInts = Array(1...Int(number))
+        var arrayOfFloats = arrayOfInts.map {Double($0)}
+        
+        var returnArray = [NodeCoordinate]()
+        
+        arrayOfFloats.forEach { i in
+            let ang = i * (Double.pi/(number/2));
+            let left = cx + (r * cos(ang));
+            let top = cy + (r * sin(ang));
+            print("top: ", top, ", left: ", left);
+            returnArray.append(NodeCoordinate(xCor: Int(left), yCor: Int(top)))
+        }
+        
+        return returnArray
+       
+        
+
     }
 }
 
-typealias NodeCoordinate = (xCor : Int, yCor : Int)
+struct NodeCoordinate : Hashable {
+    var xCor : Int
+    var yCor : Int
+}
 
 class NodePositionHolder : ObservableObject {
-    var nodeToCordinate = [MindNode : (xCor : Int, yCor : Int)]()
+    var nodeToCordinate = [MindNode : NodeCoordinate]()
     
     var currentXCor = 0
     var currentYCor = 0
@@ -138,16 +206,17 @@ class NodePositionHolder : ObservableObject {
     func getCoordinates(_ mindNode : MindNode, _ geometry : GeometryProxy) -> NodeCoordinate {
         if mindNode.isParent {
             print("Got a node that is the parent")
-            //var middleX = (geometry.frame(in: .global).maxX)/2
-            //var middleY = (geometry.frame(in: .global).maxY)/2
-           // print("MiddleX : \(middleX), MiddleY: \(middleY)")
-            return (xCor :25 , yCor :25)
+            var middleX = (geometry.frame(in: .global).midX)
+            var middleY = (geometry.frame(in: .global).midY)
+            print("MiddleX : \(middleX), MiddleY: \(middleY)")
+            return NodeCoordinate(xCor : middleX.exponent + 45, yCor :middleY.exponent + 50)
+            //return (xCor :25 , yCor :425)
         }
         else if let foundCordinate = nodeToCordinate[mindNode] {
             return foundCordinate
         } else {
             print("returning new node")
-            nodeToCordinate[mindNode] = (xCor : currentXCor , yCor : currentYCor)
+            nodeToCordinate[mindNode] = NodeCoordinate(xCor : currentXCor , yCor : currentYCor)
             currentXCor += 25
             currentYCor += 25
             return nodeToCordinate[mindNode]!
