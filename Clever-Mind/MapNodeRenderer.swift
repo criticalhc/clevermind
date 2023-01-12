@@ -16,6 +16,10 @@ struct MapNodeRenderer : View {
         }
     }
     
+    enum FoucusField : Hashable {
+        case field
+    }
+    
     @Binding var aString :  String
     
     @State var textFieldContents : String = ""
@@ -25,6 +29,10 @@ struct MapNodeRenderer : View {
     @State var xPosition = 0 as CGFloat
     
     @StateObject var nodePositionHolder = NodePositionHolder()
+    
+    @FocusState private var focusedField : FoucusField?
+    
+    @State var childNodeText = ""
     
     
     //can be used to control the number of nodes on screen
@@ -38,54 +46,64 @@ struct MapNodeRenderer : View {
     
     
     var body : some View {
-        ForEach(getNodes(someNodes), id: \.offset) { index, data in
-            GeometryReader { geo in
-                    ZStack {
-                        
-                        Circle()
-                            .size(width: 400, height: 300)
-                            .offset(x: -135, y: -120)
-                            .onTapGesture {
-                                print("Global centre:  \(geo.frame(in: .global).midX) x \(geo.frame(in: .global).midY)")
-                            }
-                        
-                            NavigationLink(destination: {
-                                Text("Hello")
-                
-                            }, label: {
-                                Ellipse().fill(Color.mint).shadow(radius: 3)
-                            }).frame(width: 125, height: 75)
-                
-                            TextField(
-                                data.title,
-                                text: $someNodes[index].title,
-                                onEditingChanged: { (isBegin) in
-                                    if isBegin {
-                                        someNodes[index].selected = true
-                                        print("Begins editing")
-                                    } else {
-                                        someNodes[index].selected = false
-                                        print("Finishes editing")
-                                    }
-                                },
-                                onCommit: {
-                                    //print("Node renderer removing node at index \(index)")
-                                    //someNodes.remove(at: index)
-                                    //print("Node renderer appending node at index \(index)")
-                                    someNodes.remove(at: index)
-                                    someNodes.insert(MindNode(data.title, "test", data.isParent), at: index)
-                                    print("commit")
-                                }
-                            )
-                            .multilineTextAlignment(.center)
-                            .frame(width: 100, height: 50)
-                        }.border(.black)
-                  
-                    .position(x: nodePositionHolder.x(data, geo), y: nodePositionHolder.y(data, geo) )
-                            .fixedSize()
+        ZStack {
+            ForEach(getNodes(someNodes).filter { $0.element.isParent }, id: \.offset) { index, data in
+                NavigationLink(destination: {
+                    Text("Hello")
+                    
+                }, label: {
+                    Ellipse().fill(Color.mint).shadow(radius: 3)
+                    
+                    
+                }).frame(width: 125, height: 75)
+                TextField(
+                    data.title,
+                    text: $someNodes[index].title,
+                    onEditingChanged: { (isBegin) in
+                        if isBegin {
+                            someNodes[index].selected = true
+                            print("Begins editing")
+                        } else {
+                            someNodes[index].selected = false
+                            print("Finishes editing")
+                        }
+                    },
+                    onCommit: {
+                        //print("Node renderer removing node at index \(index)")
+                        //someNodes.remove(at: index)
+                        //print("Node renderer appending node at index \(index)")
+                        someNodes.remove(at: index)
+                        someNodes.insert(MindNode(data.title, "test", data.isParent), at: index)
+                        print("commit")
+                    }
+                )
+                .multilineTextAlignment(.center)
+                .frame(width: 100, height: 50)
+                .fixedSize()
             }
-
-        }
+            
+            
+            
+            Group {
+                ForEach(getCordinatesForChildNodes(nodes: someNodes.filter { !$0.isParent })) { cord in
+                    //Text("\(cord.xCor) \(cord.yCor)")
+                    TextField("new topic...", text: $childNodeText )//$someNodes[computeIndexOfMindNode(targetNode: cord.node, someNodes: someNodes)].title)
+                        .position(x: CGFloat(cord.coordinate.xCor), y: CGFloat(cord.coordinate.yCor))
+                        .gesture (
+                            TapGesture().onEnded {
+                                print("I've been tapped")
+                            })
+                        .fixedSize()
+                        
+                }
+            }.zIndex(1).offset(x: -120, y : -120)
+        
+                
+                
+                
+            
+            
+         }
 //        ZStack {
 //            NavigationLink(destination: {
 //                Text("Hello")
@@ -112,8 +130,22 @@ struct MapNodeRenderer : View {
 //        }
         
     }
+        
+    func computeIndexOfMindNode(targetNode : MindNode, someNodes : [MindNode]) -> Int{
+        var counter = 0
+        for node in someNodes {
+            if node == targetNode {
+                break
+            } else {
+                counter += 1
+            }
+        }
+        return counter
+    }
     
 }
+
+
 
 struct ContentView_Previews: PreviewProvider {
     
@@ -135,7 +167,7 @@ struct ContentView_Previews: PreviewProvider {
         ZStack{
             Section {
                 
-                ForEach(placeNumbersInCircularPath(), id: \.self) { cord in
+                ForEach(placeNumbersInCircularPath(3), id: \.self) { cord in
                     HStack{
                         Text("\(cord.xCor) \(cord.yCor)")
                        Circle().size(width: 10, height: 10).position(x: CGFloat(cord.xCor), y: CGFloat(cord.yCor)).fixedSize()
@@ -158,31 +190,63 @@ struct ContentView_Previews: PreviewProvider {
             
         }}
     
-    static func placeNumbersInCircularPath() -> [NodeCoordinate] {
-        let number = 3.0 // how many number to be placed
-        let size = 50.0 // size of circle i.e. w = h = 260
-        let cx =  size/2 // center of x(in a circle)
-        let cy  = size/2// center of y(in a circle)
-        let r = size/2 // radius of a circle
-        
-        var arrayOfInts = Array(1...Int(number))
-        var arrayOfFloats = arrayOfInts.map {Double($0)}
-        
-        var returnArray = [NodeCoordinate]()
-        
-        arrayOfFloats.forEach { i in
-            let ang = i * (Double.pi/(number/2));
-            let left = cx + (r * cos(ang));
-            let top = cy + (r * sin(ang));
-            print("top: ", top, ", left: ", left);
-            returnArray.append(NodeCoordinate(xCor: Int(left), yCor: Int(top)))
-        }
-        
-        return returnArray
-       
-        
+  
+}
+
+struct MindNodeWithCoordinate : Identifiable {
+    var id = UUID()
+    
+    var node : MindNode
+    var coordinate : NodeCoordinate
+}
+
+func getCordinatesForChildNodes(nodes : [MindNode]) -> Array<MindNodeWithCoordinate> {
+    print("nodes \(nodes)")
+    print("nodes \(nodes.isEmpty)")
+
+    guard nodes.isEmpty != true else {
+        return []
 
     }
+    
+    var nodeToCordinate = [MindNodeWithCoordinate]()
+    let circularPathCordinates = placeNumbersInCircularPath(Double(nodes.count))[0...nodes.count-1]
+    
+    var loopCounter = 0
+    for coordinate in circularPathCordinates {
+        nodeToCordinate.append(MindNodeWithCoordinate( node : nodes[loopCounter],coordinate: coordinate))
+        loopCounter += 1
+    }
+    
+    return nodeToCordinate
+    
+    
+}
+
+func placeNumbersInCircularPath(_ number : Double) -> [NodeCoordinate] {
+     let number = number // how many number to be placed
+     let size = 400.0 // size of circle i.e. w = h = 260
+    let cx =  size/2 // center of x(in a circle)
+    let cy  = size/2// center of y(in a circle)
+    let r = size/2 // radius of a circle
+    
+    var arrayOfInts = Array(1...Int(number))
+    var arrayOfFloats = arrayOfInts.map {Double($0)}
+    
+    var returnArray = [NodeCoordinate]()
+    
+    arrayOfFloats.forEach { i in
+        let ang = i * (Double.pi/(number/2));
+        let left = cx + (r * cos(ang));
+        let top = cy + (r * sin(ang));
+        print("top: ", top, ", left: ", left);
+        returnArray.append(NodeCoordinate(xCor: Int(left), yCor: Int(top)))
+    }
+    
+    return returnArray
+   
+    
+
 }
 
 struct NodeCoordinate : Hashable {
