@@ -31,6 +31,16 @@ struct ContentView: View {
     }
     
     var nodeRepository : NodeCoreDataRepository
+    
+    @GestureState var magnifyBy = 1.0
+    
+    var magnification: some Gesture {
+            MagnificationGesture()
+                .updating($magnifyBy) { currentState, gestureState, transaction in
+                    print("Magnification gesture triggered")
+                    gestureState = currentState
+                }
+        }
 
     @State var activeHaNodes = [String]()
     @State var activeHbNodes = [String]()
@@ -62,7 +72,7 @@ struct ContentView: View {
                     Rectangle()
                         .frame(width: 300, height: 500)
                         .foregroundColor(Color.red)
-                }.frame(width: 1000, height: 1000)
+                }.frame(width: 500, height: 500)
             }
         }
     
@@ -74,34 +84,40 @@ struct ContentView: View {
             ZStack {
                 ScrollView([.horizontal, .vertical]) {
                     VStack {
-    //                    ForEach(activeHaNodes, id: \.self) { data in
-    //                        Section {
-    //                            Text(data)
-    //                                .frame(width: 200, height: 100)
-    //                                .background(Ellipse().fill(Color.blue).shadow(radius: 3))
-    //
-    //                         }
-    //                        .frame(width: 200, height: 100, alignment: .center)
-    //                        .gesture(drag)
-    //                    }.padding().padding()
+                        //                    ForEach(activeHaNodes, id: \.self) { data in
+                        //                        Section {
+                        //                            Text(data)
+                        //                                .frame(width: 200, height: 100)
+                        //                                .background(Ellipse().fill(Color.blue).shadow(radius: 3))
+                        //
+                        //                         }
+                        //                        .frame(width: 200, height: 100, alignment: .center)
+                        //                        .gesture(drag)
+                        //                    }.padding().padding()
                         
                         MapNodeRenderer(someNodes: $vNodeContainer, aString: $someString).onChange(of: vNodeContainer) { newValue in
                             print("Content view nodes have been updated : \(vNodeContainer)")
                             if !initialLoad {
                                 nodeRepository.persistToMoc(vNodeContainer)
                             }
-                           
+                            
                         }
                         
                     }
-                    .frame(width: horizontalScrollAreaSize, height: verticalScrollAreaSize, alignment: .center)
+                    .frame(width: 1000, height: 1000, alignment: .center)
                     
                 }
                 
-                AddNode(addNewNodeToGraph: addNewNodeToGraph)
-             
                 
-            }.toolbar {
+                .scrollIndicators(.hidden)
+                
+                AddNode(addNewNodeToGraph: addNewNodeToGraph)
+                
+                
+            }.gesture(magnification)
+            
+            
+            .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     NavigationLink {
                         Text("Hello")
@@ -176,6 +192,13 @@ struct ContentView: View {
     func initVnodeContainer() {
         clearCoreData()
         vNodeContainer = []
+    }
+    
+    struct myPreview : PreviewProvider {
+        
+        static var previews : some View  {
+            Text("Hello")
+        }
     }
        
     

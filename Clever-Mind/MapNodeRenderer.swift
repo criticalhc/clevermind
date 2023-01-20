@@ -34,6 +34,8 @@ struct MapNodeRenderer : View {
     
     @State var childNodeText = ""
     
+    @State var parentNodeCoordinates : CGPoint = CGPoint()
+    
     
     //can be used to control the number of nodes on screen
     func getNodes(_ nodes : [MindNode]) -> Array<(offset: Int, element: MindNode)>  {
@@ -48,14 +50,20 @@ struct MapNodeRenderer : View {
     var body : some View {
         ZStack {
             ForEach(getNodes(someNodes).filter { $0.element.isParent }, id: \.offset) { index, data in
-                NavigationLink(destination: {
-                    Text("Hello")
-                    
-                }, label: {
-                    Ellipse().fill(Color.mint).shadow(radius: 3)
-                    
-                    
-                }).frame(width: 125, height: 75)
+                
+                
+                    NavigationLink(destination: {
+                        Text("Hello")
+                        
+                    }, label: {
+                        Ellipse().fill(Color.mint).shadow(radius: 3)
+                        
+                        
+                    }).frame(width: 125, height: 75)
+               
+            
+                
+                
                 TextField(
                     data.title,
                     text: $someNodes[index].title,
@@ -77,9 +85,11 @@ struct MapNodeRenderer : View {
                         print("commit")
                     }
                 )
-                .multilineTextAlignment(.center)
-                .frame(width: 100, height: 50)
-                .fixedSize()
+                    .multilineTextAlignment(.center)
+                    .frame(width: 100, height: 50)
+                    .fixedSize()
+                
+                
             }
             
             
@@ -87,16 +97,23 @@ struct MapNodeRenderer : View {
             Group {
                 ForEach(getCordinatesForChildNodes(nodes: someNodes.filter { !$0.isParent })) { cord in
                     //Text("\(cord.xCor) \(cord.yCor)")
-                    TextField("new topic...", text: $childNodeText )//$someNodes[computeIndexOfMindNode(targetNode: cord.node, someNodes: someNodes)].title)
-                        .position(x: CGFloat(cord.coordinate.xCor), y: CGFloat(cord.coordinate.yCor))
-                        .gesture (
-                            TapGesture().onEnded {
-                                print("I've been tapped")
-                            })
-                        .fixedSize()
+                 
+                       
+
+                        TextField("new topic...", text: $someNodes[computeIndexOfMindNode(targetNode: cord.node, someNodes: someNodes)].title)
+                            .position(x: CGFloat(cord.coordinate.xCor), y: CGFloat(cord.coordinate.yCor))
+                            .gesture (
+                                TapGesture().onEnded {
+                                    print("I've been tapped")
+                                })
+                            .fixedSize()
+                        path(to: CGPoint(x:cord.coordinate.xCor, y: cord.coordinate.yCor), from: {
+                            return CGPoint(x: parentNodeCoordinates.x + 120, y: parentNodeCoordinates.y + 120)
+                        }() ).stroke(Color.black, lineWidth: 1).fixedSize().zIndex(-1)              }
+                   
                         
-                }
-            }.zIndex(1).offset(x: -120, y : -120)
+            
+            }.offset(x: -120, y : -120)
         
                 
                 
@@ -104,30 +121,6 @@ struct MapNodeRenderer : View {
             
             
          }
-//        ZStack {
-//            NavigationLink(destination: {
-//                Text("Hello")
-//
-//            }, label: {
-//                Ellipse().fill(Color.mint).shadow(radius: 3)
-//            })
-//
-//            Text("test")
-//        }.border(.black)
-//            .position(x: 100, y: 200)
-//
-//
-//        ZStack {
-//
-//            NavigationLink(destination: {
-//                Text("Hello")
-//
-//            }, label: {
-//                Ellipse().fill(Color.mint).shadow(radius: 3)
-//            })
-//
-//            Text("test")
-//        }
         
     }
         
@@ -247,6 +240,14 @@ func placeNumbersInCircularPath(_ number : Double) -> [NodeCoordinate] {
    
     
 
+}
+
+func path(to: CGPoint, from: CGPoint) -> Path {
+    var path = Path()
+    print("to: \(to) from: \(from)")
+    path.move(to: from)
+    path.addLine(to: to)
+    return path
 }
 
 struct NodeCoordinate : Hashable {
