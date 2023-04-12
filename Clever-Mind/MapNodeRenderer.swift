@@ -16,8 +16,9 @@ struct MapNodeRenderer : View {
         }
     }
     
-    enum FoucusField : Hashable {
-        case field
+    enum Foucusable : Hashable {
+        case none
+        case row(id: String)
     }
     
     @Binding var aString :  String
@@ -30,11 +31,20 @@ struct MapNodeRenderer : View {
     
     @StateObject var nodePositionHolder = NodePositionHolder()
     
-    @FocusState private var focusedField : FoucusField?
+    @FocusState private var focusedField : Foucusable? {
+        didSet {
+            print("Focused field has been set")
+            print(focusedField)
+        }
+    }
     
     @State var childNodeText = ""
     
     @State var parentNodeCoordinates : CGPoint = CGPoint()
+    
+    @State var someText = ""
+    
+    @Binding var selectedMindNodes : [MindNode]
     
     
     //can be used to control the number of nodes on screen
@@ -48,6 +58,7 @@ struct MapNodeRenderer : View {
     
     
     var body : some View {
+                
         ZStack {
             ForEach(getNodes(someNodes).filter { $0.element.isParent }, id: \.offset) { index, data in
                 
@@ -90,7 +101,7 @@ struct MapNodeRenderer : View {
                     .fixedSize()
                 
                 
-            }
+            }.zIndex(1)
             
             
             
@@ -100,16 +111,19 @@ struct MapNodeRenderer : View {
                  
                        
 
-                        TextField("new topic...", text: $someNodes[computeIndexOfMindNode(targetNode: cord.node, someNodes: someNodes)].title)
-                            .position(x: CGFloat(cord.coordinate.xCor), y: CGFloat(cord.coordinate.yCor))
-                            .gesture (
-                                TapGesture().onEnded {
-                                    print("I've been tapped")
-                                })
+                        TextField("new topic...", text: $someNodes[computeIndexOfMindNode(targetNode: cord.node, someNodes: someNodes)].title).background(RoundedRectangle(cornerRadius:2).fill(Color.gray).shadow(radius: 3))
+                        .position(x: CGFloat(cord.coordinate.xCor), y: CGFloat(cord.coordinate.yCor))
+                        .zIndex(1)
+                           
+                        
                             .fixedSize()
+                            .simultaneousGesture(TapGesture().onEnded {
+                                print("Ended tap gesture on text field")
+                                setSelectedStatusOfNode(cord.node, true)
+                            })
                         path(to: CGPoint(x:cord.coordinate.xCor, y: cord.coordinate.yCor), from: {
                             return CGPoint(x: parentNodeCoordinates.x + 120, y: parentNodeCoordinates.y + 120)
-                        }() ).stroke(Color.black, lineWidth: 1).fixedSize().zIndex(-1)              }
+                        }() ).stroke(Color.black, lineWidth: 1).fixedSize().zIndex(0)              }
                    
                         
             
@@ -136,9 +150,15 @@ struct MapNodeRenderer : View {
         return counter
     }
     
+    func setSelectedStatusOfNode(_ targetNode : MindNode, _ isSelected : Bool) {
+        selectedMindNodes.removeAll { node in
+            node.id == targetNode.id
+        }
+        targetNode.selected = isSelected
+        selectedMindNodes.append(targetNode)
+    }
+    
 }
-
-
 
 struct ContentView_Previews: PreviewProvider {
     

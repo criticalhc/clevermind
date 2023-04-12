@@ -56,6 +56,8 @@ struct ContentView: View {
     
     @State var initialLoad = true
     
+    @State var selectedMindNodes = [MindNode]()
+    
     var someClojure : () -> Void  = {
         print("doing something")
     }
@@ -95,7 +97,7 @@ struct ContentView: View {
                         //                        .gesture(drag)
                         //                    }.padding().padding()
                         
-                        MapNodeRenderer(someNodes: $vNodeContainer, aString: $someString).onChange(of: vNodeContainer) { newValue in
+                        MapNodeRenderer(someNodes: $vNodeContainer, aString: $someString, selectedMindNodes: $selectedMindNodes).onChange(of: vNodeContainer) { newValue in
                             print("Content view nodes have been updated : \(vNodeContainer)")
                             if !initialLoad {
                                 nodeRepository.persistToMoc(vNodeContainer)
@@ -151,20 +153,24 @@ struct ContentView: View {
     }
     
     func addNewNodeToGraph() {
-        var selectedNodes = vNodeContainer.filter { node in
-            return node.selected
-        }
+        print("My selected mind nodes \(selectedMindNodes)")
         
-        let seletecNodeStrings = selectedNodes.map { node in
-            return node.id
-        }
-        print("Selected nodes \(seletecNodeStrings)")
-        
-        if(vNodeContainer.count == 0) {
-            vNodeContainer.append(MindNode("","test", true))
+        if selectedMindNodes.count >= 1 {
+            print("Adding child node to selected mind node")
+            if selectedMindNodes.count == 1 {
+                //append children here? selectedMindNodes[0].children.
+               vNodeContainer.append(MindNode("","test", false))
+            }
+            
+            
         } else {
-            vNodeContainer.append(MindNode("","test", false))
+            if vNodeContainer.count == 0 {
+                vNodeContainer.append(MindNode("","test", true))
+            } else {
+                vNodeContainer.append(MindNode("","test", false))
+            }
         }
+        
         
         
         verticalScrollAreaSize += 100
@@ -178,6 +184,8 @@ struct ContentView: View {
     }
     
     fileprivate func clearCoreData() {
+        selectedMindNodes = []
+        
         let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Node")
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         
