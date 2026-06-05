@@ -4,7 +4,9 @@
         <attribute name="children" optional="YES" attributeType="String"/>
         <attribute name="data" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isCollapsed" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="isParentNode" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="parentId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="title" optional="YES" attributeType="String"/>
     </entity>
 </model>

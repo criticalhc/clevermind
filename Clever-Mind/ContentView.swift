@@ -73,6 +73,7 @@ struct ContentView: View {
     @State var initialLoad = true
     
     @State var selectedMindNodes = [MindNode]()
+    @State private var showClearConfirmation = false
     
     var someClojure : () -> Void  = {
         print("doing something")
@@ -113,7 +114,12 @@ struct ContentView: View {
                         //                        .gesture(drag)
                         //                    }.padding().padding()
                         
-                        MapNodeRenderer(someNodes: $vNodeContainer, aString: $someString, selectedMindNodes: $selectedMindNodes).onChange(of: vNodeContainer) { newValue in
+                        MapNodeRenderer(
+                            someNodes: $vNodeContainer,
+                            aString: $someString,
+                            selectedMindNodes: $selectedMindNodes,
+                            onPersist: { nodeRepository.persistToMoc(vNodeContainer) }
+                        ).onChange(of: vNodeContainer) { newValue in
                             print("Content view nodes have been updated : \(vNodeContainer)")
                             if !initialLoad {
                                 nodeRepository.persistToMoc(vNodeContainer)
@@ -131,6 +137,13 @@ struct ContentView: View {
                 
                 AddNode(addNewNodeToGraph: addNewNodeToGraph)
                 
+                if vNodeContainer.isEmpty {
+                    Text("Tap + to add your central topic")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                }
                 
             }.gesture(magnification)
             
@@ -145,12 +158,21 @@ struct ContentView: View {
                 }
                 ToolbarItem(placement: toolbarTrailingPlacement) {
                     Button(action: {
-                        initVnodeContainer()
+                        showClearConfirmation = true
                     }, label: {
                           Image(systemName: "trash.fill")
                       })
                 }
-            }.onAppear {
+            }
+            .alert("Delete all nodes?", isPresented: $showClearConfirmation) {
+                Button("Delete All", role: .destructive) {
+                    initVnodeContainer()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will remove every node and note from the map. This cannot be undone.")
+            }
+            .onAppear {
                 print("Content view did appear")
                 //clearCoreData()
                 if initialLoad {
@@ -169,34 +191,20 @@ struct ContentView: View {
     }
     
     func addNewNodeToGraph() {
-        print("My selected mind nodes \(selectedMindNodes)")
-        
-        if selectedMindNodes.count >= 1 {
-            print("Adding child node to selected mind node")
-            if selectedMindNodes.count == 1 {
-                //append children here? selectedMindNodes[0].children.
-               vNodeContainer.append(MindNode("","test", false))
-            }
-            
-            
+        if let selected = selectedMindNodes.first {
+            vNodeContainer.append(MindNode("New topic", "", false, parentId: selected.id))
+        } else if vNodeContainer.isEmpty {
+            vNodeContainer.append(MindNode("Central idea", "", true))
+        } else if let root = vNodeContainer.first(where: { $0.isParent }) {
+            vNodeContainer.append(MindNode("New topic", "", false, parentId: root.id))
         } else {
-            if vNodeContainer.count == 0 {
-                vNodeContainer.append(MindNode("","test", true))
-            } else {
-                vNodeContainer.append(MindNode("","test", false))
-            }
+            vNodeContainer.append(MindNode("New topic", "", false))
         }
         
-        
-        
         verticalScrollAreaSize += 100
-        print("Vertical scroll area size \(verticalScrollAreaSize)")
-        print(vNodeContainer)
-        
-        clearCoreData()
-        
+        vNodeContainer.forEach { $0.selected = false }
+        selectedMindNodes = []
         nodeRepository.persistToMoc(vNodeContainer)
-        
     }
     
     fileprivate func clearCoreData() {

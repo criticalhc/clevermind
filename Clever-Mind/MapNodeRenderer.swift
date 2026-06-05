@@ -45,7 +45,10 @@ struct MapNodeRenderer : View {
     @State var someText = ""
     
     @Binding var selectedMindNodes : [MindNode]
+    var onPersist: () -> Void = {}
     
+    @State private var detailNode: MindNode?
+    @State private var mapRevision = 0
     
     //can be used to control the number of nodes on screen
     func getNodes(_ nodes : [MindNode]) -> Array<(offset: Int, element: MindNode)>  {
@@ -58,84 +61,145 @@ struct MapNodeRenderer : View {
     
     
     var body : some View {
-                
+        let laidOut = layoutMindMap(nodes: someNodes)
+        
         ZStack {
-            ForEach(getNodes(someNodes).filter { $0.element.isParent }, id: \.offset) { index, data in
-                
-                
-                    NavigationLink(destination: {
-                        Text("Hello")
-                        
-                    }, label: {
-                        Ellipse().fill(Color.mint).shadow(radius: 3)
-                        
-                        
-                    }).frame(width: 125, height: 75)
-               
+            Canvas { context, _ in
+                for item in laidOut {
+                    guard let parentId = item.node.parentId,
+                          let parent = laidOut.first(where: { $0.node.id == parentId }) else { continue }
+                    
+                    var line = Path()
+                    line.move(to: CGPoint(x: parent.coordinate.xCor, y: parent.coordinate.yCor))
+                    line.addLine(to: CGPoint(x: item.coordinate.xCor, y: item.coordinate.yCor))
+                    context.stroke(line, with: .color(.black), lineWidth: 1)
+                }
+            }
+            .allowsHitTesting(false)
             
+            ForEach(laidOut) { item in
+                let index = computeIndexOfMindNode(targetNode: item.node, someNodes: someNodes)
                 
-                
-                TextField(
-                    data.title,
-                    text: $someNodes[index].title,
-                    onEditingChanged: { (isBegin) in
-                        if isBegin {
-                            someNodes[index].selected = true
-                            print("Begins editing")
-                        } else {
-                            someNodes[index].selected = false
-                            print("Finishes editing")
-                        }
-                    },
-                    onCommit: {
-                        //print("Node renderer removing node at index \(index)")
-                        //someNodes.remove(at: index)
-                        //print("Node renderer appending node at index \(index)")
-                        someNodes.remove(at: index)
-                        someNodes.insert(MindNode(data.title, "test", data.isParent), at: index)
-                        print("commit")
+                Group {
+                    if item.node.isParent {
+                        parentNodeView(index: index, item: item)
+                    } else {
+                        childNodeView(index: index, item: item)
                     }
+                }
+                .offset(
+                    x: CGFloat(item.coordinate.xCor) - MindMapCanvas.width / 2,
+                    y: CGFloat(item.coordinate.yCor) - MindMapCanvas.height / 2
                 )
-                    .multilineTextAlignment(.center)
-                    .frame(width: 100, height: 50)
-                    .fixedSize()
-                
-                
-            }.zIndex(1)
+            }
+        }
+        .frame(width: MindMapCanvas.width, height: MindMapCanvas.height)
+        .id(mapRevision)
+        .sheet(item: $detailNode, onDismiss: onPersist) { node in
+            NavigationView {
+                NodeDetail(with: node)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func parentNodeView(index: Int, item: MindNodeWithCoordinate) -> some View {
+        ZStack {
+            NavigationLink(destination: NodeDetail(with: someNodes[index]).onDisappear(perform: onPersist)) {
+                Ellipse()
+                    .fill(Color.mint)
+                    .shadow(radius: 3)
+                    .overlay(
+                        Ellipse()
+                            .stroke(someNodes[index].selected ? Color.blue : Color.clear, lineWidth: 3)
+                    )
+            }
+            .buttonStyle(.plain)
+            .frame(width: 125, height: 75)
             
+            TextField(
+                item.node.title.isEmpty ? "Central idea" : item.node.title,
+                text: $someNodes[index].title
+            )
+            .multilineTextAlignment(.center)
+            .textFieldStyle(.plain)
+            .frame(width: 100, height: 50)
+            .background(Color.clear)
             
+            if nodeHasChildren(someNodes[index]) {
+                collapseButton(
+                    isCollapsed: someNodes[index].isCollapsed,
+                    childCount: childCount(for: someNodes[index]),
+                    action: { toggleCollapsed(for: someNodes[index]) }
+                )
+                .offset(x: 52, y: -28)
+                .zIndex(2)
+            }
+        }
+        .nodeInteractionHandlers(
+            isCollapsed: someNodes[index].isCollapsed,
+            onSelect: { setSelectedStatusOfNode(someNodes[index], true) },
+            onToggleCollapse: { toggleCollapsed(for: someNodes[index]) },
+            onEditNotes: { detailNode = someNodes[index] },
+            hasChildren: nodeHasChildren(someNodes[index])
+        )
+    }
+    
+    @ViewBuilder
+    private func childNodeView(index: Int, item: MindNodeWithCoordinate) -> some View {
+        ZStack(alignment: .topTrailing) {
+            TextField("New topic", text: $someNodes[index].title)
+                .padding(6)
+                .textFieldStyle(.plain)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(item.node.selected ? Color.blue.opacity(0.15) : Color.gray.opacity(0.25))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(item.node.selected ? Color.blue : Color.clear, lineWidth: 2)
+                )
+                .shadow(radius: 2)
+                .fixedSize()
             
-            Group {
-                ForEach(getCordinatesForChildNodes(nodes: someNodes.filter { !$0.isParent })) { cord in
-                    //Text("\(cord.xCor) \(cord.yCor)")
-                 
-                       
-
-                        TextField("new topic...", text: $someNodes[computeIndexOfMindNode(targetNode: cord.node, someNodes: someNodes)].title).background(RoundedRectangle(cornerRadius:2).fill(Color.gray).shadow(radius: 3))
-                        .position(x: CGFloat(cord.coordinate.xCor), y: CGFloat(cord.coordinate.yCor))
-                        .zIndex(1)
-                           
-                        
-                            .fixedSize()
-                            .simultaneousGesture(TapGesture().onEnded {
-                                print("Ended tap gesture on text field")
-                                setSelectedStatusOfNode(cord.node, true)
-                            })
-                        path(to: CGPoint(x:cord.coordinate.xCor, y: cord.coordinate.yCor), from: {
-                            return CGPoint(x: parentNodeCoordinates.x + 120, y: parentNodeCoordinates.y + 120)
-                        }() ).stroke(Color.black, lineWidth: 1).fixedSize().zIndex(0)              }
-                   
-                        
-            
-            }.offset(x: -120, y : -120)
-        
-                
-                
-                
-            
-            
-         }
-        
+            if nodeHasChildren(someNodes[index]) {
+                collapseButton(
+                    isCollapsed: someNodes[index].isCollapsed,
+                    childCount: childCount(for: someNodes[index]),
+                    action: { toggleCollapsed(for: someNodes[index]) }
+                )
+                .offset(x: 8, y: -10)
+                .zIndex(2)
+            }
+        }
+        .nodeInteractionHandlers(
+            isCollapsed: someNodes[index].isCollapsed,
+            onSelect: { setSelectedStatusOfNode(someNodes[index], true) },
+            onToggleCollapse: { toggleCollapsed(for: someNodes[index]) },
+            onEditNotes: { detailNode = someNodes[index] },
+            hasChildren: nodeHasChildren(someNodes[index])
+        )
+    }
+    
+    @ViewBuilder
+    private func collapseButton(isCollapsed: Bool, childCount: Int, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 2) {
+                Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
+                    .font(.caption2.bold())
+                Text("\(childCount)")
+                    .font(.caption2.bold())
+            }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 4)
+            .background(Capsule().fill(Color.white.opacity(0.95)))
+            .overlay(Capsule().stroke(Color.secondary.opacity(0.5), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .contentShape(Capsule())
+        #if os(macOS)
+        .help(isCollapsed ? "Expand children" : "Collapse children")
+        #endif
     }
         
     func computeIndexOfMindNode(targetNode : MindNode, someNodes : [MindNode]) -> Int{
@@ -151,13 +215,90 @@ struct MapNodeRenderer : View {
     }
     
     func setSelectedStatusOfNode(_ targetNode : MindNode, _ isSelected : Bool) {
-        selectedMindNodes.removeAll { node in
-            node.id == targetNode.id
-        }
-        targetNode.selected = isSelected
+        someNodes.forEach { $0.selected = false }
+        selectedMindNodes.removeAll()
+        guard isSelected else { return }
+        targetNode.selected = true
         selectedMindNodes.append(targetNode)
     }
     
+    func nodeHasChildren(_ node: MindNode) -> Bool {
+        someNodes.contains { $0.parentId == node.id }
+    }
+    
+    func childCount(for node: MindNode) -> Int {
+        someNodes.filter { $0.parentId == node.id }.count
+    }
+    
+    func toggleCollapsed(for node: MindNode) {
+        guard let index = someNodes.firstIndex(where: { $0.id == node.id }),
+              nodeHasChildren(someNodes[index]) else { return }
+        
+        someNodes[index].isCollapsed.toggle()
+        
+        if someNodes[index].isCollapsed {
+            let visibleIds = Set(layoutMindMap(nodes: someNodes).map(\.node.id))
+            selectedMindNodes.removeAll { !visibleIds.contains($0.id) }
+            someNodes.forEach { if !visibleIds.contains($0.id) { $0.selected = false } }
+        }
+        
+        mapRevision += 1
+        onPersist()
+    }
+    
+}
+
+private struct NodeInteractionHandlers: ViewModifier {
+    let isCollapsed: Bool
+    let onSelect: () -> Void
+    let onToggleCollapse: () -> Void
+    let onEditNotes: () -> Void
+    let hasChildren: Bool
+    
+    func body(content: Content) -> some View {
+        content
+            .simultaneousGesture(
+                LongPressGesture(minimumDuration: 0.4)
+                    .onEnded { _ in
+                        if hasChildren {
+                            onToggleCollapse()
+                        } else {
+                            onSelect()
+                        }
+                    }
+            )
+            .contextMenu {
+                if hasChildren {
+                    Button(isCollapsed ? "Expand children" : "Collapse children") {
+                        onToggleCollapse()
+                    }
+                }
+                Button("Select node") {
+                    onSelect()
+                }
+                Button("Edit notes") {
+                    onEditNotes()
+                }
+            }
+    }
+}
+
+private extension View {
+    func nodeInteractionHandlers(
+        isCollapsed: Bool,
+        onSelect: @escaping () -> Void,
+        onToggleCollapse: @escaping () -> Void,
+        onEditNotes: @escaping () -> Void,
+        hasChildren: Bool
+    ) -> some View {
+        modifier(NodeInteractionHandlers(
+            isCollapsed: isCollapsed,
+            onSelect: onSelect,
+            onToggleCollapse: onToggleCollapse,
+            onEditNotes: onEditNotes,
+            hasChildren: hasChildren
+        ))
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {
@@ -206,65 +347,76 @@ struct ContentView_Previews: PreviewProvider {
   
 }
 
+enum MindMapCanvas {
+    static let width: CGFloat = 1000
+    static let height: CGFloat = 1000
+    static let center = NodeCoordinate(xCor: 500, yCor: 500)
+    static let rootChildRadius = 170
+    static let nestedChildRadius = 110
+}
+
 struct MindNodeWithCoordinate : Identifiable {
-    var id = UUID()
+    var id: UUID { node.id }
     
     var node : MindNode
     var coordinate : NodeCoordinate
 }
 
-func getCordinatesForChildNodes(nodes : [MindNode]) -> Array<MindNodeWithCoordinate> {
-    print("nodes \(nodes)")
-    print("nodes \(nodes.isEmpty)")
-
-    guard nodes.isEmpty != true else {
-        return []
-
+func layoutMindMap(nodes: [MindNode]) -> [MindNodeWithCoordinate] {
+    guard let root = nodes.first(where: { $0.isParent }) else { return [] }
+    
+    var positions: [UUID: NodeCoordinate] = [root.id: MindMapCanvas.center]
+    
+    func layoutChildren(of parentId: UUID) {
+        guard let parent = nodes.first(where: { $0.id == parentId }),
+              !parent.isCollapsed,
+              let parentPosition = positions[parentId] else { return }
+        
+        let children = nodes.filter { $0.parentId == parentId }
+        guard !children.isEmpty else { return }
+        
+        let radius = parent.isParent ? MindMapCanvas.rootChildRadius : MindMapCanvas.nestedChildRadius
+        let coordinates = placeNumbersAroundCenter(
+            count: children.count,
+            center: parentPosition,
+            radius: radius
+        )
+        
+        for (child, coordinate) in zip(children, coordinates) {
+            positions[child.id] = coordinate
+            layoutChildren(of: child.id)
+        }
     }
     
-    var nodeToCordinate = [MindNodeWithCoordinate]()
-    let circularPathCordinates = placeNumbersInCircularPath(Double(nodes.count))[0...nodes.count-1]
+    layoutChildren(of: root.id)
     
-    var loopCounter = 0
-    for coordinate in circularPathCordinates {
-        nodeToCordinate.append(MindNodeWithCoordinate( node : nodes[loopCounter],coordinate: coordinate))
-        loopCounter += 1
+    return nodes.compactMap { node in
+        guard let coordinate = positions[node.id] else { return nil }
+        return MindNodeWithCoordinate(node: node, coordinate: coordinate)
     }
-    
-    return nodeToCordinate
-    
-    
 }
 
-func placeNumbersInCircularPath(_ number : Double) -> [NodeCoordinate] {
-     let number = number // how many number to be placed
-     let size = 400.0 // size of circle i.e. w = h = 260
-    let cx =  size/2 // center of x(in a circle)
-    let cy  = size/2// center of y(in a circle)
-    let r = size/2 // radius of a circle
+func placeNumbersAroundCenter(count: Int, center: NodeCoordinate, radius: Int) -> [NodeCoordinate] {
+    guard count > 0 else { return [] }
     
-    var arrayOfInts = Array(1...Int(number))
-    var arrayOfFloats = arrayOfInts.map {Double($0)}
-    
-    var returnArray = [NodeCoordinate]()
-    
-    arrayOfFloats.forEach { i in
-        let ang = i * (Double.pi/(number/2));
-        let left = cx + (r * cos(ang));
-        let top = cy + (r * sin(ang));
-        print("top: ", top, ", left: ", left);
-        returnArray.append(NodeCoordinate(xCor: Int(left), yCor: Int(top)))
+    return (0..<count).map { index in
+        let angle = (Double(index) / Double(count)) * 2 * .pi - .pi / 2
+        let x = Double(center.xCor) + Double(radius) * cos(angle)
+        let y = Double(center.yCor) + Double(radius) * sin(angle)
+        return NodeCoordinate(xCor: Int(x.rounded()), yCor: Int(y.rounded()))
     }
-    
-    return returnArray
-   
-    
+}
 
+func placeNumbersInCircularPath(_ number: Double) -> [NodeCoordinate] {
+    placeNumbersAroundCenter(
+        count: Int(number),
+        center: NodeCoordinate(xCor: 200, yCor: 200),
+        radius: 200
+    )
 }
 
 func path(to: CGPoint, from: CGPoint) -> Path {
     var path = Path()
-    print("to: \(to) from: \(from)")
     path.move(to: from)
     path.addLine(to: to)
     return path

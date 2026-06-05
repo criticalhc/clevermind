@@ -16,22 +16,14 @@ struct NodeDetail: View {
     }
     
     var body: some View {
-        NavigationView {
-            VStack {
-                TextEditor(text: $mindNode.data)
-                    .padding()
-                    #if os(iOS)
-                    .navigationBarTitleDisplayMode(.inline)
-                    #endif
-                    .frame(maxWidth :.infinity, alignment: .topLeading)
-                Spacer()
-            }.frame(maxWidth :.infinity, alignment: .leading)
-            Spacer()
-        }.border(.black)
-            .navigationTitle(mindNode.title)
-    }
-    
-    func printMessage() -> Void {
-        print("Hello")
+        VStack(alignment: .leading) {
+            TextEditor(text: $mindNode.data)
+                .padding()
+                #if os(iOS)
+                .navigationBarTitleDisplayMode(.inline)
+                #endif
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        }
+        .navigationTitle(mindNode.title.isEmpty ? "Notes" : mindNode.title)
     }
 }
