@@ -20,7 +20,9 @@ struct NodeDetail: View {
             VStack {
                 TextEditor(text: $mindNode.data)
                     .padding()
+                    #if os(iOS)
                     .navigationBarTitleDisplayMode(.inline)
+                    #endif
                     .frame(maxWidth :.infinity, alignment: .topLeading)
                 Spacer()
             }.frame(maxWidth :.infinity, alignment: .leading)

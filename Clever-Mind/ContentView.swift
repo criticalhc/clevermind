@@ -32,6 +32,22 @@ struct ContentView: View {
     
     var nodeRepository : NodeCoreDataRepository
     
+    private var toolbarLeadingPlacement: ToolbarItemPlacement {
+        #if os(macOS)
+        .automatic
+        #else
+        .navigationBarLeading
+        #endif
+    }
+    
+    private var toolbarTrailingPlacement: ToolbarItemPlacement {
+        #if os(macOS)
+        .primaryAction
+        #else
+        .navigationBarTrailing
+        #endif
+    }
+    
     @GestureState var magnifyBy = 1.0
     
     var magnification: some Gesture {
@@ -120,14 +136,14 @@ struct ContentView: View {
             
             
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: toolbarLeadingPlacement) {
                     NavigationLink {
                         Text("Hello")
                     } label: {
                         Text("Help")
                     }
-                                    }
-                ToolbarItem(placement: .navigationBarTrailing) {
+                }
+                ToolbarItem(placement: toolbarTrailingPlacement) {
                     Button(action: {
                         initVnodeContainer()
                     }, label: {
