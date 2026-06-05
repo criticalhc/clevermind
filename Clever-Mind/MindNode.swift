@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 class MindNode : Identifiable, ObservableObject, Equatable, CustomStringConvertible, Hashable{
     
@@ -19,17 +20,29 @@ class MindNode : Identifiable, ObservableObject, Equatable, CustomStringConverti
     
     var id: UUID = UUID()
     
-    var title : String
-    var data : String
-    var selected = false
+    @Published var title : String
+    @Published var data : String
+    @Published var selected = false
+    @Published var isCollapsed = false
     var isParent : Bool
+    var parentId: UUID?
     
     var children = [String]()
     
-    init(_ title : String, _ data : String, _ isParent: Bool) {
+    init(
+        _ title: String,
+        _ data: String,
+        _ isParent: Bool,
+        id: UUID = UUID(),
+        parentId: UUID? = nil,
+        isCollapsed: Bool = false
+    ) {
+        self.id = id
         self.title = title
-        self.data = DataConstants.ERGO_TEXT.rawValue
+        self.data = data.isEmpty ? DataConstants.ERGO_TEXT.rawValue : data
         self.isParent = isParent
+        self.parentId = parentId
+        self.isCollapsed = isCollapsed
     }
     
     func hash(into hasher: inout Hasher) {

@@ -15,5 +15,8 @@ struct CleverMindApp: App {
         WindowGroup {
             ContentView(nodeRepository: NodeCoreDataRepository(moc: dataController.container.viewContext)).environment(\.managedObjectContext, dataController.container.viewContext)
         }
+        #if os(macOS)
+        .defaultSize(width: 1000, height: 800)
+        #endif
     }
 }
